@@ -1,0 +1,218 @@
+<article class="markdown-body entry-content container-lg" itemprop="text"><div class="markdown-heading" dir="auto"><h1 tabindex="-1" class="heading-element" dir="auto">NibArchive File Format</h1><a id="user-content-nibarchive-file-format" class="anchor" aria-label="Permalink: NibArchive File Format" href="#nibarchive-file-format"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto">This is a description of the NibArchive file format. It is used by UIKit on iOS 6 and later.
+The details were discovered by manipulating the input and observing the output of the ibtool(1) executable.</p>
+<p dir="auto">Nib files are a serialization format for UI-objects. They are then instantiated with the NSCoder API.
+The file format reflects this, as all encoded types corresponds to one NSCoder method. It may also
+be that the file format supports more types, but it is not possible to find them with ibtool.</p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto">File Layout</h2><a id="user-content-file-layout" class="anchor" aria-label="Permalink: File Layout" href="#file-layout"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto">The file is using a common data layout of a header and data values. The header
+contains a hardcoded file identifier, some integers that may be a version number,
+and a list of offsets of where to find the different types of data.</p>
+<p dir="auto">The data is consists of four lists. It is, a list of objects, a list of keys,
+a list of values, and a list of class names.</p>
+<p dir="auto">Each item in the list of objects specifies a class and a range of indexes into
+the list of values.</p>
+<p dir="auto">The list of keys is essenitally an array of strings.</p>
+<p dir="auto">The list of values stores a key for each value, the type of the object, and
+some data related to the type of object.</p>
+<p dir="auto">The list of class names is mostly a list of strings.</p>
+<p dir="auto">The following table gives a more detailed description of how to parse the file.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Byte offset</th>
+<th align="left">File Content</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">0 to 9</td>
+<td align="left"><code>NIBArchive</code></td>
+<td align="left">10 bytes secifying this is a NibArchive file.</td>
+</tr>
+<tr>
+<td align="left">10 to 13</td>
+<td align="left">uint32 LE</td>
+<td align="left">Constant 1.</td>
+</tr>
+<tr>
+<td align="left">14 to 17</td>
+<td align="left">uint32 LE</td>
+<td align="left">Constant 9.</td>
+</tr>
+<tr>
+<td align="left">18 to 21</td>
+<td align="left">uint32 LE</td>
+<td align="left">Object count.</td>
+</tr>
+<tr>
+<td align="left">22 to 25</td>
+<td align="left">uint32 LE</td>
+<td align="left">File offset for objects data.</td>
+</tr>
+<tr>
+<td align="left">26 to 29</td>
+<td align="left">uint32 LE</td>
+<td align="left">Key count.</td>
+</tr>
+<tr>
+<td align="left">30 to 33</td>
+<td align="left">uint32 LE</td>
+<td align="left">File offset for keys data.</td>
+</tr>
+<tr>
+<td align="left">34 to 37</td>
+<td align="left">uint32 LE</td>
+<td align="left">Value count.</td>
+</tr>
+<tr>
+<td align="left">38 to 41</td>
+<td align="left">uint32 LE</td>
+<td align="left">File offset for values data.</td>
+</tr>
+<tr>
+<td align="left">42 to 45</td>
+<td align="left">uint32 LE</td>
+<td align="left">Class name count.</td>
+</tr>
+<tr>
+<td align="left">46 to 49</td>
+<td align="left">uint32 LE</td>
+<td align="left">File offset for class name data.</td>
+</tr>
+<tr>
+<td align="left">see bytes 18 to 25</td>
+<td align="left">objects</td>
+<td align="left">Sequentially coded objects.</td>
+</tr>
+<tr>
+<td align="left">see bytes 26 to 33</td>
+<td align="left">keys</td>
+<td align="left">Sequentially coded keys.</td>
+</tr>
+<tr>
+<td align="left">see bytes 34 to 41</td>
+<td align="left">values</td>
+<td align="left">Sequentially coded values.</td>
+</tr>
+<tr>
+<td align="left">see bytes 42 to 49</td>
+<td align="left">class names</td>
+<td align="left">Sequentially coded class names.</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto">Varint coding</h4><a id="user-content-varint-coding" class="anchor" aria-label="Permalink: Varint coding" href="#varint-coding"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto">To save space for coding integer, the NibArchive file has a variable length coding
+of integers. I have only seen integers coded as two bytes, so how this extends to larger values is an
+unverifived assumption.</p>
+<p dir="auto">It codes integers in 7-bit chunks, little-endian order. The high-bit in each byte signifies if it is the
+last byte.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Bitcoding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">0 to 127</td>
+<td align="left"><code>1</code>b<sub>6</sub>b<sub>5</sub>b<sub>4</sub>b<sub>3</sub>b<sub>2</sub>b<sub>1</sub>b<sub>0</sub></td>
+</tr>
+<tr>
+<td align="left">128 to 16383</td>
+<td align="left"><code>0</code>b<sub>6</sub>b<sub>5</sub>b<sub>4</sub>b<sub>3</sub>b<sub>2</sub>b<sub>1</sub>b<sub>0</sub>, <code>1</code>b<sub>13</sub>b<sub>12</sub>b<sub>11</sub>b<sub>10</sub>b<sub>9</sub>b<sub>8</sub>b<sub>7</sub></td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto">Object coding</h4><a id="user-content-object-coding" class="anchor" aria-label="Permalink: Object coding" href="#object-coding"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<table>
+<thead>
+<tr>
+<th>File Content</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>varint</td>
+<td align="left">Class name index. The object’s class is specified as an offset into the list of class names.</td>
+</tr>
+<tr>
+<td>varint</td>
+<td align="left">Values index. The values stored for an object is specified as an offset and length into the list of values.</td>
+</tr>
+<tr>
+<td>varint</td>
+<td align="left">Value count.</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto">Key coding</h4><a id="user-content-key-coding" class="anchor" aria-label="Permalink: Key coding" href="#key-coding"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<table>
+<thead>
+<tr>
+<th align="left">File Content</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">varint</td>
+<td align="left">Key name length.</td>
+</tr>
+<tr>
+<td align="left">UTF-8 string</td>
+<td align="left">Key name. It is not null terminated.</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto">Value coding</h4><a id="user-content-value-coding" class="anchor" aria-label="Permalink: Value coding" href="#value-coding"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<table>
+<tbody><tr><th align="left">File Content</th><th align="left">Description</th></tr>
+<tr><td>varint</td><td>Key index. The key used for retreiving the value. It is an offset into the list of keys.</td></tr>
+<tr><td>uint8</td><td>Value type:<br>
+<code>0</code>: int8, 1 byte <br>
+<code>1</code>: int16 LE, 2 bytes <br>
+<code>2</code>: int32 LE, 4 bytes <br>
+<code>3</code>: int64 LE, 8 bytes <br>
+<code>4</code>: true <br>
+<code>5</code>: false <br>
+<code>6</code>: float, 4 bytes <br>
+<code>7</code>: double, 8 bytes <br>
+<code>8</code>: data, varint , number of bytes as specified in varint <br>
+<code>9</code>: nil <br>
+<code>10</code>: object reference, 4 bytes uint32 LE coding an offset into the list of objects <br>
+</td></tr>
+<tr><td></td><td>Data depending on value type.</td></tr>
+</tbody></table>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto">Class name coding</h4><a id="user-content-class-name-coding" class="anchor" aria-label="Permalink: Class name coding" href="#class-name-coding"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<table>
+<thead>
+<tr>
+<th align="left">File Content</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">varint</td>
+<td align="left">Length of class name string.</td>
+</tr>
+<tr>
+<td align="left">varint</td>
+<td align="left">Number of extra int32 values. Only values 0 and 1 has been observed.</td>
+</tr>
+<tr>
+<td align="left">int32 LE*</td>
+<td align="left">Extra int32 values.</td>
+</tr>
+<tr>
+<td align="left">string</td>
+<td align="left">Class name string.</td>
+</tr>
+</tbody>
+</table>
+</article>
